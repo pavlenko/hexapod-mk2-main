@@ -1,5 +1,5 @@
-main.o main.o: ../main.c ../es.h ../timer0.h
+main.o main.o: ../main.cpp ../lib/es.h ../Leg.h
 
-../es.h:
+../lib/es.h:
 
-../timer0.h:
+../Leg.h:

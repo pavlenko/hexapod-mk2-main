@@ -8,10 +8,23 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include lib/subdir.mk
 -include subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(strip $(CC_DEPS)),)
+-include $(CC_DEPS)
+endif
+ifneq ($(strip $(C++_DEPS)),)
+-include $(C++_DEPS)
+endif
+ifneq ($(strip $(C_UPPER_DEPS)),)
+-include $(C_UPPER_DEPS)
+endif
+ifneq ($(strip $(CXX_DEPS)),)
+-include $(CXX_DEPS)
+endif
 ifneq ($(strip $(ASM_DEPS)),)
 -include $(ASM_DEPS)
 endif
@@ -23,6 +36,9 @@ ifneq ($(strip $(S_UPPER_DEPS)),)
 endif
 ifneq ($(strip $(C_DEPS)),)
 -include $(C_DEPS)
+endif
+ifneq ($(strip $(CPP_DEPS)),)
+-include $(CPP_DEPS)
 endif
 endif
 
@@ -45,8 +61,8 @@ all: hexapod-mk2-main.elf secondary-outputs
 # Tool invocations
 hexapod-mk2-main.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
-	@echo 'Invoking: AVR C Linker'
-	avr-gcc -Wl,-Map,hexapod-mk2-main.map -mmcu=atmega32 -o "hexapod-mk2-main.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	@echo 'Invoking: AVR C++ Linker'
+	avr-g++ -Wl,-Map,hexapod-mk2-main.map,--cref -mrelax -Wl,--gc-sections -mmcu=atmega16 -o "hexapod-mk2-main.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -64,13 +80,13 @@ hexapod-mk2-main.hex: hexapod-mk2-main.elf
 
 sizedummy: hexapod-mk2-main.elf
 	@echo 'Invoking: Print Size'
-	-avr-size --format=avr --mcu=atmega32 hexapod-mk2-main.elf
+	-avr-size --format=avr --mcu=atmega16 hexapod-mk2-main.elf
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(FLASH_IMAGE)$(ELFS)$(OBJS)$(ASM_DEPS)$(S_DEPS)$(SIZEDUMMY)$(S_UPPER_DEPS)$(LSS)$(C_DEPS) hexapod-mk2-main.elf
+	-$(RM) $(C_UPPER_DEPS)$(S_DEPS)$(LSS)$(C_DEPS)$(FLASH_IMAGE)$(CC_DEPS)$(ELFS)$(C++_DEPS)$(OBJS)$(CXX_DEPS)$(ASM_DEPS)$(SIZEDUMMY)$(S_UPPER_DEPS)$(CPP_DEPS) hexapod-mk2-main.elf
 	-@echo ' '
 
 secondary-outputs: $(LSS) $(FLASH_IMAGE) $(SIZEDUMMY)
